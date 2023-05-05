@@ -1,9 +1,9 @@
 FROM --platform=linux/amd64 ubuntu:22.04
 
-RUN apt update && \
+RUN apt-get update && \
     apt -y install curl && \
     curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
-    apt -y install nodejs && \
+    apt-get -y install nodejs && \
     npm install yarn -g
 
 # Create app directory
