@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const fbx2gltf = require('../fbx2gltf');
 const path = require('path');
 
+const URL = process.env.URL || 'http://13.214.109.219:8080'
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -31,7 +33,7 @@ router.post('/', upload.single('file'), function(req, res, next) {
   const srcFile = req.file.path;
   const destFile = `storage/${crypto.randomUUID()}.glb`;
   fbx2gltf(srcFile, `public/${destFile}`).then(() => {
-    res.json({link: `/${destFile}`});
+    res.json({link: `${URL}/${destFile}`});
   }, next).catch(next)
 });
 
