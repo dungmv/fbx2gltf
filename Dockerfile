@@ -7,21 +7,22 @@ RUN apt-get update && \
     npm install yarn -g
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
+
+ENV CLOUDINARY_CLOUD_NAME=""\
+    CLOUDINARY_API_KEY=""\
+    CLOUDINARY_API_SECRET=""
 
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 COPY package.json yarn.lock ./
 
-RUN yarn
-# If you are building your code for production
-# RUN npm ci --omit=dev
+RUN yarn install --frozen-lockfile
 
 # Bundle app source
 COPY . .
 
 RUN chmod +x fbx2gltf/linux/bin/FBX-glTF-conv
+RUN rm -rf fbx2gltf/windows fbx2gltf/darwin
 
 EXPOSE 3000
 
