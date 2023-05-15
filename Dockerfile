@@ -11,7 +11,8 @@ WORKDIR /app
 
 ENV CLOUDINARY_CLOUD_NAME=""\
     CLOUDINARY_API_KEY=""\
-    CLOUDINARY_API_SECRET=""
+    CLOUDINARY_API_SECRET=""\
+    JWT_TOKEN_SECRET="123456"
 
 # Install app dependencies
 COPY package.json yarn.lock ./
