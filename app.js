@@ -1,6 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
-const path = require('path');
+const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 
 const indexRouter = require('./routes/index');
@@ -9,6 +9,18 @@ const authenticateJWT = require('./middleware/authenticate');
 
 const app = express();
 
+morgan.format('json', (tokens, req, res) => {
+  return JSON.stringify({
+    time: tokens.date(req, res, 'iso'),
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: tokens.status(req, res),
+    length: tokens.res(req, res, 'content-length'),
+    response: tokens['response-time'](req, res),
+  })
+})
+
+app.use(morgan('json'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
