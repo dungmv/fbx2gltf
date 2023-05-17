@@ -51,7 +51,7 @@ router.post('/', upload.single('file'), function (req, res, next) {
     const filename = crypto.randomBytes(16).toString('hex');
     return cloudinary.uploader.upload(destFile, { public_id: filename });
   }).then((cloudinaryRes) => {
-    res.json({ link: cloudinaryRes.secure_url });
+    res.json(cloudinaryRes);
   }).catch(next).finally(() => {
     rimraf.rimrafSync([srcFile, destFile], {});
   })
