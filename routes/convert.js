@@ -48,6 +48,7 @@ router.post('/', upload.single('file'), function (req, res, next) {
     return
   }
 
+  let filePath = ''
   const workDir = req.file.destination
   if (req.file.mimetype == 'application/zip') {
     const zip = new AdmZip(req.file.path);
