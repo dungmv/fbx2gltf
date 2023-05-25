@@ -1,14 +1,31 @@
-const createError = require('http-errors');
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const Sentry = require('@sentry/node');
 
 const indexRouter = require('./routes/index');
 const convertRouter = require('./routes/convert');
 const authenticateJWT = require('./middleware/authenticate');
 
 const app = express();
+
+Sentry.init({
+  dsn: "https://d3ec18297b214262b8226f2de1cd2f89@o46394.ingest.sentry.io/4505242785415168",
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Sentry.Integrations.Express({ app }),
+    // Automatically instrument Node.js libraries and frameworks
+    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
 
 morgan.format('json', (tokens, req, res) => {
   return JSON.stringify({
@@ -27,14 +44,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 
+// RequestHandler creates a separate execution context, so that all
+// transactions/spans/breadcrumbs are isolated across requests
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
+
 app.use('/', indexRouter);
 app.use('/convert', authenticateJWT, convertRouter);
 app.get('/healthz', (req, res) => { res.send('ok'); })
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 
 // error handler
 app.use(function (err, req, res, next) {
